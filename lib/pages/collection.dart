@@ -8,195 +8,144 @@ import 'package:soukchic/pages/homepage.dart';
 import 'package:soukchic/pages/trends.dart';
 
 class Collection extends StatefulWidget {
-  const Collection({Key? key}) : super(key: key);
+  final List<dynamic> childData;
+
+  const Collection(this.childData);
 
   @override
   State<Collection> createState() => _CollectionState();
 }
 
+class Data {
+  final String id;
+  final String name;
+  final String image;
+  final List children;
+
+  Data({
+    required this.id,
+    required this.name,
+    required this.image,
+    required this.children,
+  });
+
+  factory Data.fromJson(Map<String, dynamic> json) {
+    return Data(
+      id: json['id'],
+      name: json['name'],
+      image: json['image'],
+      children: json['children'],
+    );
+  }
+}
+
 class _CollectionState extends State<Collection> {
+  Future<List<Data>> loadData() async {
+    final list = widget.childData;
+    return list.map((e) => Data.fromJson(e)).toList();
+  }
+
+  Future<List<dynamic>> loadChildData(childData) async {
+    final list = childData.children;
+    return list.map((e) => Data.fromJson(e)).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        leading:IconButton(onPressed: () {
-            Navigator.pop(context);
-          }, icon: Icon(Icons.arrow_back,color: Colors.black,)),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.black,
+            )),
         title: Text(
           'Clothing Collections',
           style: GoogleFonts.openSans(
               color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Container(
-                height: 0.75.sh,
-                width: 1.sw,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      offset: Offset(0, -15),
-                      blurRadius: 30,
-                      color: Color(0xFFDADADA).withOpacity(0.15),
-                    ),
-                  ],
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Tops',style: TextStyle(fontSize: 13.sp,fontWeight: FontWeight.bold),),
-                          Row(
-                            children: [
-                              Text('View all'),
-                              Icon(Icons.arrow_forward),
-                            ],
-                          ),
-
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
+      body: FutureBuilder<List<Data>>(
+        future: loadData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            var items = snapshot.data as List<Data>;
+            return ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Card(
+                      margin: const EdgeInsets.only(top: 12.0),
                       child: Column(
-                        
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 15.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Item('assets/images/001.png', 'Jackets'),
-                                Item('assets/images/002.png', 'Tank Tops'),
-                                Item('assets/images/003.png', 'Halter Tops'),
-
+                                Text(
+                                  items[index].name,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'view all',
+                                    ),
+                                    IconButton(
+                                      icon: SvgPicture.asset(
+                                        'assets/images/arrow.svg',
+                                      ),
+                                      onPressed: () {},
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Item('assets/images/004.png', 'Bodysuits'),
-                                Item('assets/images/005.png', 'Sweaters'),
-                                Item('assets/images/006.png', 'Rompers'),
-
-                              ],
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            height: size.height * 0.5,
+                            child: FutureBuilder<List<dynamic>>(
+                              future: loadChildData(items[index]),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  var products = snapshot.data as List<dynamic>;
+                                  return GridView.builder(
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: products.length >= 9
+                                          ? 9
+                                          : products.length,
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 3),
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return Item(products[index].image,
+                                            products[index].name);
+                                      });
+                                } else if (snapshot.hasError) {
+                                  return Text("${snapshot.error}");
+                                }
+                                return CircularProgressIndicator();
+                              },
                             ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Item('assets/images/007.png', 'Sweat shirts'),
-                              Item('assets/images/008.png', 'Blazers'),
-                              Item('assets/images/009.png', 'Waist coats'),
-
-                            ],
-                          ),
-
                         ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Container(
-                height: 0.75.sh,
-                width: 1.sw,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      offset: Offset(0, -15),
-                      blurRadius: 30,
-                      color: Color(0xFFDADADA).withOpacity(0.15),
-                    ),
-                  ],
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Dresses',style: TextStyle(fontSize: 13.sp,fontWeight: FontWeight.bold),),
-                          Row(
-                            children: [
-                              Text('View all'),
-                              Icon(Icons.arrow_forward),
-                            ],
-                          ),
-
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Column(
-                        
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Item('assets/images/001.png', 'Jackets'),
-                                Item('assets/images/002.png', 'Tank Tops'),
-                                Item('assets/images/003.png', 'Halter Tops'),
-
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Item('assets/images/004.png', 'Bodysuits'),
-                                Item('assets/images/005.png', 'Sweaters'),
-                                Item('assets/images/006.png', 'Rompers'),
-
-                              ],
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Item('assets/images/007.png', 'Sweat shirts'),
-                              Item('assets/images/008.png', 'Blazers'),
-                              Item('assets/images/009.png', 'Waist coats'),
-
-                            ],
-                          ),
-
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-                  ],
-                ),
-              ),
-              bottomNavigationBar: Container(
+                      ));
+                });
+          } else if (snapshot.hasError) {
+            return Text("${snapshot.error}");
+          }
+          return const CircularProgressIndicator();
+        },
+      ),
+      bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
@@ -217,7 +166,8 @@ class _CollectionState extends State<Collection> {
                   children: [
                     IconButton(
                       icon: SvgPicture.asset(
-                        'assets/images/home.svg',color: Colors.grey,
+                        'assets/images/home.svg',
+                        color: Colors.grey,
                       ),
                       onPressed: () {
                         Navigator.push(
@@ -226,7 +176,7 @@ class _CollectionState extends State<Collection> {
                         );
                       },
                     ),
-                    Text('Home',style: TextStyle(color: Colors.grey))
+                    Text('Home', style: TextStyle(color: Colors.grey))
                   ],
                 ),
                 Column(
@@ -243,7 +193,9 @@ class _CollectionState extends State<Collection> {
                         );
                       },
                     ),
-                    Text('Category',)
+                    Text(
+                      'Category',
+                    )
                   ],
                 ),
                 Column(
@@ -251,7 +203,8 @@ class _CollectionState extends State<Collection> {
                   children: [
                     IconButton(
                       icon: SvgPicture.asset(
-                        'assets/images/trends.svg',color: Colors.grey,
+                        'assets/images/trends.svg',
+                        color: Colors.grey,
                       ),
                       onPressed: () {
                         Navigator.push(
@@ -260,7 +213,10 @@ class _CollectionState extends State<Collection> {
                         );
                       },
                     ),
-                    Text('Trends',style: TextStyle(color: Colors.grey),)
+                    Text(
+                      'Trends',
+                      style: TextStyle(color: Colors.grey),
+                    )
                   ],
                 ),
               ],
@@ -268,16 +224,12 @@ class _CollectionState extends State<Collection> {
           ),
         ),
       ),
-            );
-          
-        
-    
-    
+    );
   }
 }
 
 class Item extends StatefulWidget {
- final String imagePath, text;
+  final String imagePath, text;
 
   const Item(
     this.imagePath,
@@ -290,16 +242,21 @@ class Item extends StatefulWidget {
 class _ItemState extends State<Item> {
   @override
   Widget build(BuildContext context) {
-    // ignore: sized_box_for_whitespace
-    return Container(
+    return SizedBox(
       height: 0.19.sh,
       width: 0.17.sw,
       child: Column(
-                                  children: [
-                                    Image.asset(widget.imagePath),
-                                    Text(widget.text),
-                                  ],
-                                ),
+        children: [
+          Image(
+            height: 100,
+            image: NetworkImage(widget.imagePath),
+          ),
+          Text(
+            widget.text,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }

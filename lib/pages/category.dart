@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,6 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:soukchic/pages/collection.dart';
 import 'package:soukchic/pages/homepage.dart';
 import 'package:soukchic/pages/trends.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart';
 
 class Categories extends StatefulWidget {
   const Categories({Key? key}) : super(key: key);
@@ -13,9 +17,45 @@ class Categories extends StatefulWidget {
   State<Categories> createState() => _CategoriesState();
 }
 
+class Data {
+  final String id;
+  final String name;
+  final String image;
+  final List children;
+
+  Data({
+    required this.id,
+    required this.name,
+    required this.image,
+    required this.children,
+  });
+
+  factory Data.fromJson(Map<String, dynamic> json) {
+    return Data(
+      id: json['id'],
+      name: json['name'],
+      image: json['image'],
+      children: json['children'],
+    );
+  }
+}
+
+Future<List<Data>> readJsonData() async {
+  //read json file
+  final jsondata = await rootBundle.loadString('assets/categories.json');
+  //decode json data as list
+  final list = json.decode(jsondata)["categories"] as List<dynamic>;
+
+  //map json and initialize using DataModel
+  return list.map((e) => Data.fromJson(e)).toList();
+}
+
 class _CategoriesState extends State<Categories> {
+  late Future<List<Data>> futureData;
+
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         leadingWidth: 110,
@@ -51,54 +91,41 @@ class _CategoriesState extends State<Categories> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: [
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text(
-                  'Category',
-                  style: GoogleFonts.alexBrush(
-                      color: Colors.grey[800],
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w900),
-                ),
-              ]),
-              Padding(
-                padding: const EdgeInsets.only(left: 10, right: 10),
-                child: Column(
-                  children: [
-                    Category(
-                      'assets/images/111.png',
-                      'Clothing Collections',
-                    ),
-                    Category(
-                      'assets/images/112.png',
-                      'Hair Care Collections',
-                    ),
-                    Category(
-                      'assets/images/113.png',
-                      'Accessory Collections',
-                    ),
-                    Category(
-                      'assets/images/114.png',
-                      'Skin Care Collections',
-                    ),
-                    Category(
-                      'assets/images/115.png',
-                      'Meke Up Collections',
-                    ),
-                    Category(
-                      'assets/images/111.png',
-                      'Clothing Collections',
-                    ),
-                  ],
-                ),
-              )
-            ],
+      body: Column(
+        children: [
+          Text(
+            'Category',
+            style: GoogleFonts.alexBrush(
+                color: Colors.grey[800],
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w900),
           ),
-        ),
+          SizedBox(
+            height: size.height * 0.75,
+            child: FutureBuilder<List<Data>>(
+              future: readJsonData(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  var items = snapshot.data as List<Data>;
+                  return ListView.builder(
+                      padding: const EdgeInsets.only(top: 25),
+                      itemCount: items.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Card(
+                          margin: const EdgeInsets.all(10),
+                          child: Category(items[index].image, items[index].name,
+                              items[index].children),
+                        );
+                      });
+                } else if (snapshot.hasError) {
+                  return Text("${snapshot.error}");
+                }
+                // By default show a loading spinner.
+                return const CircularProgressIndicator();
+              },
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -185,11 +212,9 @@ class _CategoriesState extends State<Categories> {
 
 class Category extends StatefulWidget {
   final String imagePath, text;
+  final List<dynamic> childData;
 
-  const Category(
-    this.imagePath,
-    this.text,
-  );
+  const Category(this.imagePath, this.text, this.childData);
 
   @override
   State<Category> createState() => _CategoryState();
@@ -205,8 +230,10 @@ class _CategoryState extends State<Category> {
         children: [
           Row(
             children: [
-              Image.asset(
-                widget.imagePath,
+              Image(
+                height: 50,
+                image: NetworkImage(widget.imagePath),
+                fit: BoxFit.contain,
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 8),
@@ -225,7 +252,8 @@ class _CategoryState extends State<Category> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Collection()),
+                MaterialPageRoute(
+                    builder: (context) => Collection(widget.childData)),
               );
             },
           ),

@@ -221,10 +221,10 @@ class _AmbassedorsState extends State<Ambassedors> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Container(
-          height: 0.28.sh,
-          width: 0.3.sw,
-          decoration: BoxDecoration(color: Colors.yellow,borderRadius: BorderRadius.circular(12),image: DecorationImage(image: NetworkImage(widget.imagePath,),fit: BoxFit.fill,) ),
-          
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(25)),
+          child: Image(
+            image: NetworkImage(widget.imagePath),
+          ),
         ),
         CachedNetworkImage(
           imageUrl: widget.imagePath,
@@ -241,7 +241,6 @@ class _AmbassedorsState extends State<Ambassedors> {
           placeholder: (context, url) => CircularProgressIndicator(),
           errorWidget: (context, url, error) => Icon(Icons.error),
         ),
-        
         Column(
           children: [
             SizedBox(
