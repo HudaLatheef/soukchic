@@ -18,58 +18,89 @@ class _CategoriesState extends State<Categories> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        
         leadingWidth: 110,
         backgroundColor: Colors.white,
-        leading: Padding(padding: const EdgeInsets.only(left: 10),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Padding(padding: const EdgeInsets.only(left: 15),
-                child: SvgPicture.asset('assets/images/drawer.svg',), ),
-                      SvgPicture.asset('assets/images/search.svg', ), ],
+              Padding(
+                padding: const EdgeInsets.only(left: 15),
+                child: SvgPicture.asset(
+                  'assets/images/drawer.svg',
+                ),
+              ),
+              SvgPicture.asset(
+                'assets/images/search.svg',
+              ),
+            ],
           ),
         ),
-        title: SvgPicture.asset( 'assets/images/1.svg'),
+        title: SvgPicture.asset('assets/images/1.svg'),
         centerTitle: true,
-        actions: [ SvgPicture.asset( 'assets/images/3.svg', ),
-          Padding( padding: const EdgeInsets.only(left: 25, right: 15),
-            child: SvgPicture.asset('assets/images/4.svg',),
+        actions: [
+          SvgPicture.asset(
+            'assets/images/3.svg',
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 25, right: 15),
+            child: SvgPicture.asset(
+              'assets/images/4.svg',
+            ),
           ),
         ],
       ),
-      body:SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Text(
-                    'Category',
-                    style: GoogleFonts.alexBrush(
-                        color: Colors.grey[800],
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w900),
-                  ),
-                ]),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10,right: 10),
-                  child: Column(
-                    children: [
-                      Category('assets/images/111.png', 'Clothing Collections', ),
-                      Category('assets/images/112.png', 'Hair Care Collections', ),
-                      Category('assets/images/113.png', 'Accessory Collections', ),
-                      Category('assets/images/114.png', 'Skin Care Collections', ),
-                      Category('assets/images/115.png', 'Meke Up Collections', ),
-                      Category('assets/images/111.png', 'Clothing Collections', ),
-                    ],
-                  ),
-                )
+                Text(
+                  'Category',
+                  style: GoogleFonts.alexBrush(
+                      color: Colors.grey[800],
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w900),
+                ),
+              ]),
+              Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10),
+                child: Column(
+                  children: [
+                    Category(
+                      'assets/images/111.png',
+                      'Clothing Collections',
+                    ),
+                    Category(
+                      'assets/images/112.png',
+                      'Hair Care Collections',
+                    ),
+                    Category(
+                      'assets/images/113.png',
+                      'Accessory Collections',
+                    ),
+                    Category(
+                      'assets/images/114.png',
+                      'Skin Care Collections',
+                    ),
+                    Category(
+                      'assets/images/115.png',
+                      'Meke Up Collections',
+                    ),
+                    Category(
+                      'assets/images/111.png',
+                      'Clothing Collections',
+                    ),
+                  ],
+                ),
+              )
             ],
           ),
         ),
-      ) ,
-       bottomNavigationBar: Container(
+      ),
+      bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
@@ -90,7 +121,8 @@ class _CategoriesState extends State<Categories> {
                   children: [
                     IconButton(
                       icon: SvgPicture.asset(
-                        'assets/images/home.svg',color: Colors.grey,
+                        'assets/images/home.svg',
+                        color: Colors.grey,
                       ),
                       onPressed: () {
                         Navigator.push(
@@ -99,7 +131,7 @@ class _CategoriesState extends State<Categories> {
                         );
                       },
                     ),
-                    Text('Home',style: TextStyle(color: Colors.grey))
+                    Text('Home', style: TextStyle(color: Colors.grey))
                   ],
                 ),
                 Column(
@@ -116,7 +148,9 @@ class _CategoriesState extends State<Categories> {
                         );
                       },
                     ),
-                    Text('Category',)
+                    Text(
+                      'Category',
+                    )
                   ],
                 ),
                 Column(
@@ -124,7 +158,8 @@ class _CategoriesState extends State<Categories> {
                   children: [
                     IconButton(
                       icon: SvgPicture.asset(
-                        'assets/images/trends.svg',color: Colors.grey,
+                        'assets/images/trends.svg',
+                        color: Colors.grey,
                       ),
                       onPressed: () {
                         Navigator.push(
@@ -133,7 +168,10 @@ class _CategoriesState extends State<Categories> {
                         );
                       },
                     ),
-                    Text('Trends',style: TextStyle(color: Colors.grey),)
+                    Text(
+                      'Trends',
+                      style: TextStyle(color: Colors.grey),
+                    )
                   ],
                 ),
               ],
@@ -142,8 +180,9 @@ class _CategoriesState extends State<Categories> {
         ),
       ),
     );
-     }
+  }
 }
+
 class Category extends StatefulWidget {
   final String imagePath, text;
 
@@ -162,32 +201,36 @@ class _CategoryState extends State<Category> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Image.asset(
-                                widget.imagePath,
-                          ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 15),
-                                  child: Text(widget.text,style: GoogleFonts.openSans(fontSize: 14.sp,fontWeight: FontWeight.bold),),
-                                ),
-                              ],
-                            ),
-                            IconButton(
-                          icon: SvgPicture.asset(
-                            'assets/images/arrow.svg',
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Collection()),
-                            );
-                          },
-                        ),
-                          ],
-                        ),
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Image.asset(
+                widget.imagePath,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(
+                  widget.text,
+                  style: GoogleFonts.openSans(
+                      fontSize: 14.sp, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          IconButton(
+            icon: SvgPicture.asset(
+              'assets/images/arrow.svg',
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Collection()),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

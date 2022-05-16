@@ -290,6 +290,7 @@ class Item extends StatefulWidget {
 class _ItemState extends State<Item> {
   @override
   Widget build(BuildContext context) {
+    // ignore: sized_box_for_whitespace
     return Container(
       height: 0.19.sh,
       width: 0.17.sw,

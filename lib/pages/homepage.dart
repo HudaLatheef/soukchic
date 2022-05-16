@@ -1,9 +1,47 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:soukchic/pages/category.dart';
 import 'package:soukchic/pages/trends.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+Future<List<Data>> fetchData() async {
+  final response = await http.get(Uri.parse('https://reqres.in/api/users'));
+  if (response.statusCode == 200) {
+    List jsonResponse = json.decode(response.body)["data"];
+    return jsonResponse.map((data) => Data.fromJson(data)).toList();
+  } else {
+    throw Exception('Unexpected error occured!');
+  }
+}
+
+class Data {
+  final int id;
+  final String email;
+  final String firstName;
+  final String lastName;
+  final String avatar;
+
+  Data(
+      {required this.id,
+      required this.email,
+      required this.firstName,
+      required this.lastName,
+      required this.avatar});
+
+  factory Data.fromJson(Map<String, dynamic> json) {
+    return Data(
+        id: json['id'],
+        email: json['email'],
+        firstName: json['first_name'],
+        lastName: json['last_name'],
+        avatar: json['avatar']);
+  }
+}
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -13,90 +51,72 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late Future<List<Data>> futureData;
+
+  @override
+  void initState() {
+    super.initState();
+    futureData = fetchData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leadingWidth: 110,
         backgroundColor: Colors.white,
-        leading: Padding(padding: const EdgeInsets.only(left: 10),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Padding(padding: const EdgeInsets.only(left: 15),
-                child: SvgPicture.asset('assets/images/drawer.svg',), ),
-                      SvgPicture.asset('assets/images/search.svg', ), ],
-          ),
-        ),
-        title: SvgPicture.asset( 'assets/images/1.svg'),
-        centerTitle: true,
-        actions: [ SvgPicture.asset( 'assets/images/3.svg', ),
-          Padding( padding: const EdgeInsets.only(left: 25, right: 15),
-            child: SvgPicture.asset('assets/images/4.svg',),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: [
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text(
-                  'Brand ambassedors',
-                  style: GoogleFonts.alexBrush(
-                      color: Colors.grey[800],
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w900),
-                ),
-              ]),
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Ambassedors(
-                              'assets/images/011.png', 'Nicole', 'Garcia'),
-                          Ambassedors(
-                              'assets/images/012.png', 'Chelsen', 'Smith'),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Ambassedors(
-                              'assets/images/013.png', 'Georgia', 'Wilson'),
-                          Ambassedors(
-                              'assets/images/014.png', 'Lanze', 'Celot'),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Ambassedors(
-                              'assets/images/015.png', 'Jenny', 'Miller'),
-                          Ambassedors(
-                              'assets/images/016.png', 'Riya', 'Jhonson'),
-                        ],
-                      ),
-                    ),
-                  ],
+                padding: const EdgeInsets.only(left: 15),
+                child: SvgPicture.asset(
+                  'assets/images/drawer.svg',
                 ),
-              )
+              ),
+              SvgPicture.asset(
+                'assets/images/search.svg',
+              ),
             ],
           ),
         ),
+        title: SvgPicture.asset('assets/images/1.svg'),
+        centerTitle: true,
+        actions: [
+          SvgPicture.asset(
+            'assets/images/3.svg',
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 25, right: 15),
+            child: SvgPicture.asset(
+              'assets/images/4.svg',
+            ),
+          ),
+        ],
+      ),
+      body: FutureBuilder<List<Data>>(
+        future: futureData,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<Data>? data = snapshot.data;
+            return GridView.builder(
+              padding: const EdgeInsets.only(top: 25),
+              itemCount: data?.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Ambassedors(data![index].avatar, data[index].firstName,
+                    data[index].lastName);
+              },
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2),
+            );
+          } else if (snapshot.hasError) {
+            return Text("${snapshot.error}");
+          }
+          // By default show a loading spinner.
+          return const CircularProgressIndicator();
+        },
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -136,7 +156,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     IconButton(
                       icon: SvgPicture.asset(
-                        'assets/images/category.svg',color: Colors.grey,
+                        'assets/images/category.svg',
+                        color: Colors.grey,
                       ),
                       onPressed: () {
                         Navigator.push(
@@ -145,7 +166,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         );
                       },
                     ),
-                    Text('Category',style: TextStyle(color: Colors.grey),)
+                    Text(
+                      'Category',
+                      style: TextStyle(color: Colors.grey),
+                    )
                   ],
                 ),
                 Column(
@@ -153,7 +177,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     IconButton(
                       icon: SvgPicture.asset(
-                        'assets/images/trends.svg',color: Colors.grey,
+                        'assets/images/trends.svg',
+                        color: Colors.grey,
                       ),
                       onPressed: () {
                         Navigator.push(
@@ -162,7 +187,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         );
                       },
                     ),
-                    Text('Trends',style: TextStyle(color: Colors.grey),)
+                    Text(
+                      'Trends',
+                      style: TextStyle(color: Colors.grey),
+                    )
                   ],
                 ),
               ],
@@ -193,19 +221,32 @@ class _AmbassedorsState extends State<Ambassedors> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Container(
-          height: 0.39.sh,
-          width: 0.42.sw,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              image: DecorationImage(
-                image: AssetImage(
-                  widget.imagePath,
-                ),
-                fit: BoxFit.fill,
-              )),
+          height: 0.28.sh,
+          width: 0.3.sw,
+          decoration: BoxDecoration(color: Colors.yellow,borderRadius: BorderRadius.circular(12),image: DecorationImage(image: NetworkImage(widget.imagePath,),fit: BoxFit.fill,) ),
+          
         ),
+        CachedNetworkImage(
+          imageUrl: widget.imagePath,
+          imageBuilder: (context, imageProvider) => Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(12.0)),
+              image: DecorationImage(
+                  image: imageProvider,
+                  fit: BoxFit.fill,
+                  colorFilter:
+                      ColorFilter.mode(Colors.red, BlendMode.colorBurn)),
+            ),
+          ),
+          placeholder: (context, url) => CircularProgressIndicator(),
+          errorWidget: (context, url, error) => Icon(Icons.error),
+        ),
+        
         Column(
           children: [
+            SizedBox(
+              height: 5,
+            ),
             Text(
               widget.text,
               style: GoogleFonts.alexBrush(
