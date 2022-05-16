@@ -221,10 +221,10 @@ class _AmbassedorsState extends State<Ambassedors> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(25)),
-          child: Image(
-            image: NetworkImage(widget.imagePath),
-          ),
+          height: 0.28.sh,
+          width: 0.38.sw,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(25),color: Colors.yellow, image: DecorationImage(image: NetworkImage(widget.imagePath),fit: BoxFit.fill)),
+         
         ),
         CachedNetworkImage(
           imageUrl: widget.imagePath,
